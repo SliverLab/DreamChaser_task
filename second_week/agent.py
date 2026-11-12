@@ -6,7 +6,7 @@ import logging
 import time
 from tools import TOOLS,TOOL_REGISTRY,ToolError
 from scheme import FinalAnswer,Step
-import tiktoken
+from tenacity import retry,stop_after_attempt,wait_exponential,before_sleep_log
 
 
 logger=logging.getLogger(__name__)
@@ -24,6 +24,28 @@ client=OpenAI(
     base_url=LLM_BASE_URL,
     max_retries=0
 )
+
+def log_success(retry_state):
+    try:
+        _=retry_state.outcome.result()
+        logger.info(f"LLM在第{retry_state.attempt_number}次请求尝试后，成功响应")
+    except:
+        pass
+        
+@retry(
+        stop=stop_after_attempt(MAX_RETRIES),
+        wait=wait_exponential(multiplier=1,min=1),
+        before_sleep=before_sleep_log(logger,logging.INFO),
+        after=log_success,
+        reraise=True
+)
+def tenacity_response(model,messages,response_format):
+    response=client.chat.completions.create(
+        model=model,
+        messages=messages,
+        response_format=response_format
+    )
+    return response
 
 
 def _tools_block():
@@ -77,14 +99,16 @@ JSON 必须严格符合以下结构：
             {"role":"user","content":question}
         ]
         try:
-            response=client.chat.completions.create(
-                model=LLM_MODEL_NAME,
-                messages=messages,
-                response_format={
-                    "type":"json_object",
-                }
-            )
+            response=tenacity_response(model=LLM_MODEL_NAME,messages=messages,response_format={"type":"json_object",})
             msg=response.choices[0].message
+
+            tokens_in=response.usage.prompt_tokens if response.usage else 0
+            tokens_out=response.usage.completion_tokens if response.usage else 0
+            cost_rmb=(tokens_in/1000000)*2+(tokens_out/1000000)*8
+            logger.info(
+                f"----第{current_stepts}轮----\n总共耗费token数:{response.usage.total_tokens}\n预计花费{cost_rmb}"
+            )
+
             step=Step.model_validate_json(msg.content or "")
             history.append(f"Thought:{step.thought}")
             history.append(f"Action:{step.action},Action_input:{step.action_input}")
@@ -114,7 +138,8 @@ JSON 必须严格符合以下结构：
                 history.append(f"Observation:{observation}")
                 logger.info(f"Observation:{observation}")
         except Exception as e:
-            logger.error(f"因{e}发生错误，程序终止")
+            logger.error(f"在第{current_stepts}模型调用时，发生错误{e},耗尽所有重试次数，最终失败")
+            
             break
         current_stepts+=1
 
