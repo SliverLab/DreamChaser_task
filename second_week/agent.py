@@ -6,8 +6,9 @@ import logging
 import time
 from tools import TOOLS,TOOL_REGISTRY,ToolError
 from scheme import FinalAnswer,Step
-from tenacity import retry,stop_after_attempt,wait_exponential,before_sleep_log
+from tenacity import retry,stop_after_attempt,wait_exponential,before_sleep_log,retry_if_exception_type
 
+from openai import APIConnectionError,APITimeoutError,RateLimitError,InternalServerError
 
 logger=logging.getLogger(__name__)
 dotenv_path=r"D:\个人文件\DreamCharser\final_version\.env"
@@ -33,12 +34,20 @@ def log_success(retry_state):
         pass
         
 @retry(
-        stop=stop_after_attempt(MAX_RETRIES),
-        wait=wait_exponential(multiplier=1,min=1),
-        before_sleep=before_sleep_log(logger,logging.INFO),
-        after=log_success,
-        reraise=True
+    retry=retry_if_exception_type((
+        APITimeoutError,
+        APIConnectionError,
+        RateLimitError,
+        InternalServerError
+    )),
+    stop=stop_after_attempt(MAX_RETRIES),
+    wait=wait_exponential(multiplier=1,min=2,max=10),
+    before_sleep=before_sleep_log(logger,logging.WARNING),
+    after=log_success,
+    reraise=True
 )
+
+
 def tenacity_response(model,messages,response_format):
     response=client.chat.completions.create(
         model=model,
@@ -106,41 +115,53 @@ JSON 必须严格符合以下结构：
             tokens_out=response.usage.completion_tokens if response.usage else 0
             cost_rmb=(tokens_in/1000000)*2+(tokens_out/1000000)*8
             logger.info(
-                f"----第{current_stepts}轮----\n总共耗费token数:{response.usage.total_tokens}\n预计花费{cost_rmb}"
+                f"USAGE tokens_in={response.usage.prompt_tokens}  tokens_out={response.usage.completion_tokens}  step={current_stepts}  cost={cost_rmb:.6f}"
             )
-
+        except Exception as e:
+            logger.error(f"API请求失败（不可恢复）：{e}")
+            break
+        
+        try:
             step=Step.model_validate_json(msg.content or "")
-            history.append(f"Thought:{step.thought}")
-            history.append(f"Action:{step.action},Action_input:{step.action_input}")
-            logger.info(f"Thought:{step.thought}")
-            logger.info(f"Action:{step.action},Action_input:{step.action_input}")
-            if step.action=="Finish":
+        except Exception as parser_err:
+            logger.warning(f"解析失败，重试中：{parser_err}")
+            history.append(f"Error:你的上一轮解析输出失败，报错：{parser_err}。请重试")
+            current_stepts+=1
+            continue
+        history.append(f"Thought:{step.thought}")
+        history.append(f"Action:{step.action},Action_input:{step.action_input}")
+        logger.info(f"Thought:{step.thought}")
+        logger.info(f"Action:{step.action},Action_input:{step.action_input}")
+        if step.action=="Finish":
+            try:
                 final_answer=FinalAnswer.model_validate(step.action_input)
-                logger.info(f"Final Answer:{final_answer.summary}")
-                print(f"Final Answer:{final_answer.summary}")
-                history.append(f"Final Answer:{final_answer}")
-                break
+            except Exception as final_err:
+                logger.warning(f"FinalAnswer解析失败，进入模型自主修复过程，错误原因{final_err}")
+                history.append(f"Error,你选择了Finish，，但输出不符合要求，报错{final_err}，请修正后在进行输出")
+                current_stepts+=1
+                continue
+
+            logger.info(f"Final Answer:{final_answer.summary}")
+            print(f"Final Answer:{final_answer.summary}")
+            history.append(f"Final Answer:{final_answer}")
+            break
+        else:
+            if step.action not in TOOL_REGISTRY:
+                observation=json.dumps(
+                    {"error":f"未知工具:{step.action},可用工具：{list(TOOL_REGISTRY)}"},
+                    ensure_ascii=False
+                )
             else:
-                if step.action not in TOOL_REGISTRY:
-                    observation=json.dumps(
-                        {"error":f"未知工具:{step.action},可用工具：{list(TOOL_REGISTRY)}"},
-                        ensure_ascii=False
-                    )
-                    history.append(f"Observation:{observation}")
-                    current_stepts+=1
-                    continue
                 func,ArgsModel=TOOL_REGISTRY[step.action]
                 try:
                     results=func(ArgsModel.model_validate(step.action_input))
                     observation=json.dumps(results,ensure_ascii=False)
                 except ToolError as e:
-                    observation=json.dumps({"error":str(e)},ensure_ascii=False)
-                history.append(f"Observation:{observation}")
-                logger.info(f"Observation:{observation}")
-        except Exception as e:
-            logger.error(f"在第{current_stepts}模型调用时，发生错误{e},耗尽所有重试次数，最终失败")
-            
-            break
+                    observation=json.dumps({"error":f"工具业务报错：{e}"},ensure_ascii=False)
+                except Exception as e:
+                    observation=json.dumps({"error":f"参数格式不正确{e}"},ensure_ascii=False)
+            history.append(f"Observation:{observation}")
+            logger.info(f"Observation:{observation}")
         current_stepts+=1
 
 
