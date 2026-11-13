@@ -11,8 +11,7 @@ from tenacity import retry,stop_after_attempt,wait_exponential,before_sleep_log,
 from openai import APIConnectionError,APITimeoutError,RateLimitError,InternalServerError
 
 logger=logging.getLogger(__name__)
-dotenv_path=r"D:\个人文件\DreamCharser\final_version\.env"
-load_dotenv(dotenv_path=dotenv_path)
+load_dotenv()
 MAX_RETRIES=int(os.getenv("MAX_RETRIES","3"))
 LLM_API_KEY=os.getenv("LLM_API_KEY")
 LLM_BASE_URL=os.getenv("LLM_BASE_URL")
