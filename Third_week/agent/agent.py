@@ -119,7 +119,7 @@ async def run():
                         break
 
 
-                    current_turn.append(msg.model_dump(exclude_none=True))
+                    current_turn.append(msg.model_dump(exclude_none=True))#经过model_dump之后，msg是一个字典，里面包含了tool_calls，tool_calls里面有很多没必要的内容，所以需要稍微提取修饰一下tool_call
 
 
                     if not msg.tool_calls:
@@ -134,7 +134,7 @@ async def run():
                         except json.JSONDecodeError:
                             tool_output="Error:你生成的参数不是合法的JSON格式，请重新生成"
 
-                            
+
                             current_turn.append({
                                 "role":"tool",
                                 "tool_call_id":tool_call.id,
@@ -173,6 +173,9 @@ async def run():
                     memory.turns.append(current_turn)
                     memory.save()
                     logger.info(f"本轮对话已经写入短期记忆")
+
+
+                await memory.compress_memory(client=client,model_name=LLM_MODEL_NAME)
 
 
 if __name__=="__main__":
