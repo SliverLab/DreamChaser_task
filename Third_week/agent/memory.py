@@ -5,8 +5,8 @@ from pathlib import Path
 from datetime import datetime
 logger=logging.getLogger(__name__)
 class MemoryManager:
-    def __init__(self,file_path=None,window_turns=2,md_path=None):
-        self.file_path=file_path
+    def __init__(self,file_path="memory.json",window_turns=2,md_path="MEMORY.md"):
+        self.file_path=Path(file_path)
         self.window_turns=window_turns
 
         self.md_path=Path(md_path)
@@ -20,7 +20,7 @@ class MemoryManager:
                 logger.error(f"长期记忆加载失败:{e}")
                 self.long_term_memory=""
         
-        if os.path.exists(self.file_path):
+        if self.file_path.exists():
             try:
                 with open(self.file_path,"r",encoding="utf-8")as f:
                     content=json.load(f)
@@ -34,7 +34,7 @@ class MemoryManager:
             self.summary=""
             self.turns=[]
     def save(self):
-        Path(self.file_path).parent.mkdir(parents=True,exist_ok=True)
+        self.file_path.parent.mkdir(parents=True,exist_ok=True)
         with open(self.file_path,"w",encoding="utf-8")as f:
             json.dump(
                 {
@@ -88,15 +88,17 @@ class MemoryManager:
                 role=msg["role"]
                 if role=="user":
                     text_lines.append(f'用户：{msg.get("content","")}')
-                if role=="assistant":
-                    text_lines.append(f'AI:{msg.get("content","")}')
-                if role=="assistant" and msg.get("tool_calls"):
-                    for tc in msg["tool_calls"]:
-                        func_name=tc["function"]["name"]
-                        args=tc["function"]["arguments"]
-                        text_lines.append(f"AI决定调用工具：{func_name}，参数：{args}")
+                elif role=="assistant":
+                    content=msg.get("content","")or ""
+                    if content:
+                        text_lines.append(f"AI:{content}")
+                    if msg.get("tool_calls"):
+                        for tc in msg["tool_calls"]:
+                            func_name=tc["function"]["name"]
+                            args=tc["function"]["arguments"]
+                            text_lines.append(f"AI决定调用工具：{func_name}，参数：{args}")
                 elif role=="tool":
-                    content=msg.get("content","")
+                    content=msg.get("content","")or ""
                     if len(content)>100:
                         content=content[:100]+"..."
                     text_lines.append(f"工具执行结果：{content}")
@@ -129,8 +131,8 @@ class MemoryManager:
 
 
     def save_long_term_memory(self,new_memory_lines):
-        Path(self.file_path).parent.mkdir(parents=True,exist_ok=True)
-        self.long_term_memory+=f"-{new_memory_lines}\n"
+
+        self.long_term_memory+=f"- {new_memory_lines}\n"
         self.md_path.parent.mkdir(parents=True,exist_ok=True)
         with open(self.md_path,"w",encoding="utf-8")as f:
             f.write(self.long_term_memory)
@@ -143,13 +145,14 @@ class MemoryManager:
             content=msg.get("content","") or ""
             if role=="user":
                 turn_text.append(f'用户：{content}')
-            if role=="assistant":
-                turn_text.append(f'AI:{content}')
-            if role=="assistant" and msg.get("tool_calls"):
-                for tc in msg.get("tool_calls"):
-                    fun_name=tc["function"]["name"]
-                    args=tc["function"]["arguments"]
-                    turn_text.append(f"AI决定调用工具:{fun_name}[{args}]")
+            elif role=="assistant":
+                if content:
+                    turn_text.append(f'AI:{content}')
+                if msg.get("tool_calls"):
+                    for tc in msg.get("tool_calls"):
+                        fun_name=tc["function"]["name"]
+                        args=tc["function"]["arguments"]
+                        turn_text.append(f"AI决定调用工具:{fun_name}[{args}]")
             elif role=="tool":
                 turn_text.append(f'工具执行结果:{content}')
         text_data="\n".join(turn_text)

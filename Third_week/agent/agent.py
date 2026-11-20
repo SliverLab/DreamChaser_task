@@ -28,7 +28,7 @@ client=AsyncOpenAI(
 
 from pathlib import Path
 BASE_DIR=Path(__file__).resolve().parent
-MEMORY_DIR=BASE_DIR/"memory"
+MEMORY_DIR=BASE_DIR.parent/"memory"
 MEMORY_JSON_PATH=str(MEMORY_DIR/"memory.json")
 MEMORY_MD_PATH=str(MEMORY_DIR/"MEMORY.md")
 memory=MemoryManager(
@@ -187,9 +187,9 @@ async def run():
                     memory.save()
                     logger.info(f"本轮对话已经写入短期记忆")
 
-                await memory.extract_long_term_memory(client=client,model_name=LLM_MODEL_NAME,current_turn=current_turn)
+                    await memory.extract_long_term_memory(client=client,model_name=LLM_MODEL_NAME,current_turn=current_turn)
 
-                await memory.compress_memory(client=client,model_name=LLM_MODEL_NAME)
+                    await memory.compress_memory(client=client,model_name=LLM_MODEL_NAME)
 
 
 if __name__=="__main__":
