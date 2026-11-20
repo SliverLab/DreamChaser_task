@@ -25,6 +25,19 @@ client=AsyncOpenAI(
     max_retries=0
 )
 
+
+from pathlib import Path
+BASE_DIR=Path(__file__).resolve().parent
+MEMORY_DIR=BASE_DIR/"memory"
+MEMORY_JSON_PATH=str(MEMORY_DIR/"memory.json")
+MEMORY_MD_PATH=str(MEMORY_DIR/"MEMORY.md")
+memory=MemoryManager(
+    file_path=MEMORY_JSON_PATH,
+    window_turns=4,
+    md_path=MEMORY_MD_PATH
+)
+
+
 def log_success(retry_state):
     try:
         _=retry_state.outcome.result()
@@ -55,7 +68,7 @@ async def tenacity_response(model,messages,tools):
     return response
 
 
-memory=MemoryManager(file_path="memory.json",window_turns=4)
+
 
 async def run():
     server_params=StdioServerParameters(
@@ -174,6 +187,7 @@ async def run():
                     memory.save()
                     logger.info(f"本轮对话已经写入短期记忆")
 
+                await memory.extract_long_term_memory(client=client,model_name=LLM_MODEL_NAME,current_turn=current_turn)
 
                 await memory.compress_memory(client=client,model_name=LLM_MODEL_NAME)
 
