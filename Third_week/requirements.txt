@@ -1,0 +1,9 @@
+mcp
+pydantic
+python-dotenv
+tenacity
+openai
+psutil
+cryptography
+serpapi
+requests

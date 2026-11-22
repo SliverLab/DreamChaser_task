@@ -1,0 +1,8 @@
+**/.env
+venv/
+**/__pycache__/
+*.log
+.playwright-mcp/
+
+# 短期记忆：运行时状态，每次对话都会整份重写，不纳入版本库
+memory/memory.json
