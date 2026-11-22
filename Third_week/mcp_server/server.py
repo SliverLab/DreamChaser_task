@@ -102,7 +102,7 @@ def decrypt_file(filename:str)->dict:
         raise ToolError(f"{filename}不存在，请检查文件路径是否对")
     decrypted_data=cipher.decrypt(file_path.read_bytes())
     file_path.write_bytes(decrypted_data)
-    return{"status":"success","message":f"{filename}中的文件已经重新解密，并且实现覆盖"}
+    return{"status":"success","message":f"{filename}中的文件已成功解密，并且实现覆盖"}
 
 
 @mcp.tool()

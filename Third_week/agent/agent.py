@@ -17,6 +17,8 @@ LLM_API_KEY=os.getenv("LLM_API_KEY")
 LLM_BASE_URL=os.getenv("LLM_BASE_URL")
 LLM_MODEL_NAME=os.getenv("LLM_MODEL_NAME")
 MAX_STEPTS=int(os.getenv("MAX_STEPTS","8"))
+WINDOW_TURNS=int(os.getenv("WINDOW_TURNS","4"))
+TOKEN_BUDGET=int(os.getenv("TOKEN_BUDGET","3000"))
 if not all  ([LLM_API_KEY,LLM_BASE_URL,LLM_MODEL_NAME,MAX_STEPTS]):
     raise ValueError("请确保LLM_API_KEY，LLM_BASE_URL，LLM_MODEL_NAME存在")
 client=AsyncOpenAI(
@@ -31,9 +33,12 @@ BASE_DIR=Path(__file__).resolve().parent
 MEMORY_DIR=BASE_DIR.parent/"memory"
 MEMORY_JSON_PATH=str(MEMORY_DIR/"memory.json")
 MEMORY_MD_PATH=str(MEMORY_DIR/"MEMORY.md")
+SERVER_PATH=BASE_DIR.parent/"mcp_server"/"server.py"
+LOG_DIR=BASE_DIR.parent/"logs"
+LOG_PATH=LOG_DIR/"week3.log"
 memory=MemoryManager(
     file_path=MEMORY_JSON_PATH,
-    window_turns=4,
+    window_turns=WINDOW_TURNS,
     md_path=MEMORY_MD_PATH
 )
 
@@ -73,7 +78,7 @@ async def tenacity_response(model,messages,tools):
 async def run():
     server_params=StdioServerParameters(
         command=sys.executable,
-        args=[r"D:\个人文件\DreamCharser\Third_week\mcp_server\server.py"],
+        args=[str(SERVER_PATH)],
         env=None
     )
     async with stdio_client(server_params) as (read, write):
@@ -189,12 +194,13 @@ async def run():
 
                     await memory.extract_long_term_memory(client=client,model_name=LLM_MODEL_NAME,current_turn=current_turn)
 
-                    await memory.compress_memory(client=client,model_name=LLM_MODEL_NAME)
+                    await memory.compress_memory(client=client,model_name=LLM_MODEL_NAME,token_budget=TOKEN_BUDGET)
 
 
 if __name__=="__main__":
+    LOG_DIR.mkdir(parents=True,exist_ok=True)
     logging.basicConfig(
-        filename=r"D:\个人文件\DreamCharser\Third_week\logs\week3.log",
+        filename=str(LOG_PATH),
         level=logging.INFO,
         format="%(asctime)s -%(name)s -%(levelname)s -%(message)s"
     )
