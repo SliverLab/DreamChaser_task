@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>登录态复用的两条路 - 本地练习站</title>
+<link rel="stylesheet" href="../assets/style.css">
+<script src="../assets/app.js"></script>
+<script>if (!window.PW.whoami()) location.replace('../index.html');</script>
+</head>
+<body>
+<header class="top">
+  <a href="../list.html">← 返回列表</a>
+  <span class="site">本地练习站</span>
+</header>
+
+<article style="max-width:780px;margin:0 auto;padding:20px 20px 64px">
+  <h1>登录态复用的两条路:user-data-dir 与 storage state</h1>
+  <p class="meta">标签:会话、登录</p>
+
+  <p>浏览器自动化绕不开登录。每次任务都手动登录一次不现实,于是需要把登录态留下来。常见做法有两个,方向不同但目的相同。</p>
+
+  <h2>第一条路:固定配置目录</h2>
+  <p>用 --user-data-dir 指向一个固定目录,浏览器就把 Cookie、localStorage、缓存全写在那里。下次用同一个目录启动,登录态还在。关键细节是:不指定这个参数时,浏览器工具会自己建一个<strong>临时目录</strong>,关掉就没了。所以"隔离"是默认就有的,"可复用"才是这个参数买来的东西。</p>
+
+  <h2>第二条路:显式保存会话状态</h2>
+  <p>storage state 是把当前会话里的 Cookie 和 localStorage 导成一个文件,下次启动时读回来。它更轻,也更容易在多个环境之间搬。缺点是必须显式保存和恢复,而且一旦页面有额外的会话信息(比如内存里的 token),文件里是抓不到的。</p>
+
+  <h2>安全上必须守住的两条</h2>
+  <p>一是不要用扩展或远程调试端口附着到自己日常使用的浏览器上,那等于把你的主账号交给自动化任务。二是无论用哪种方式保存下来的会话文件,都<strong>不能提交到仓库</strong>:里面的 Cookie 就是登录凭据,提交等于泄露。配置目录和会话文件都要进 gitignore。</p>
+
+  <h2>怎么选</h2>
+  <p>只有一个项目、需要长期保持登录,选固定配置目录更省事。需要在不同机器或不同任务之间切换同步,选会话状态文件更灵活。两者不要混用,混用会出现"明明保存了却还是未登录"这种难查的问题。</p>
+</article>
+</body>
+</html>

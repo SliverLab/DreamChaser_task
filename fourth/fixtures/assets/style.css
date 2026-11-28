@@ -1,0 +1,95 @@
+/* 练习站样式:只求结构清楚、便于自动化定位,不追求美观 */
+:root {
+  --fg: #1f2328;
+  --muted: #6b7280;
+  --line: #d8dee4;
+  --bg: #ffffff;
+  --accent: #2563eb;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font: 15px/1.75 -apple-system, "Segoe UI", "Microsoft YaHei", sans-serif;
+  color: var(--fg);
+  background: var(--bg);
+}
+
+.top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 20px;
+  border-bottom: 1px solid var(--line);
+  font-size: 14px;
+}
+
+.top a { color: var(--accent); text-decoration: none; }
+.site { color: var(--muted); }
+
+main { max-width: 780px; margin: 0 auto; padding: 24px 20px 64px; }
+
+h1 { font-size: 22px; margin: 8px 0 4px; }
+h2 { font-size: 17px; margin: 24px 0 6px; }
+.meta { color: var(--muted); font-size: 13px; margin: 0 0 18px; }
+
+input[type="text"], input[type="password"], textarea {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  font: inherit;
+  color: inherit;
+  background: #fff;
+}
+
+button {
+  padding: 7px 14px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: #f6f8fa;
+  font: inherit;
+  cursor: pointer;
+}
+
+button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+button.primary:hover { filter: brightness(1.05); }
+button[disabled] { opacity: .45; cursor: not-allowed; }
+
+.field { margin-bottom: 14px; }
+.field label { display: block; font-size: 13px; color: var(--muted); margin-bottom: 4px; }
+
+.card {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 14px 16px;
+  margin-bottom: 12px;
+}
+
+.card h3 { margin: 0 0 6px; font-size: 16px; }
+.card h3 a { color: var(--accent); text-decoration: none; }
+.card p { margin: 0 0 8px; color: #3d444d; font-size: 14px; }
+
+.tag {
+  display: inline-block;
+  padding: 1px 8px;
+  margin-right: 6px;
+  border-radius: 999px;
+  background: #eef2ff;
+  color: #3730a3;
+  font-size: 12px;
+}
+
+#tags { margin: 12px 0 8px; display: flex; flex-wrap: wrap; gap: 8px; }
+#tags button.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+.toolbar { display: flex; gap: 8px; margin-bottom: 4px; }
+.toolbar input { flex: 1; }
+
+.count { color: var(--muted); font-size: 13px; margin: 8px 0 12px; }
+.empty { color: var(--muted); padding: 24px 0; }
+.notice { color: #166534; background: #f0fdf4; border: 1px solid #bbf7d0;
+          border-radius: 6px; padding: 8px 12px; margin: 12px 0; font-size: 14px; }
+.error { color: #b91c1c; font-size: 14px; margin: 8px 0; }

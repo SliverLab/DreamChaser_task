@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>无头模式还是有界面 - 本地练习站</title>
+<link rel="stylesheet" href="../assets/style.css">
+<script src="../assets/app.js"></script>
+<script>if (!window.PW.whoami()) location.replace('../index.html');</script>
+</head>
+<body>
+<header class="top">
+  <a href="../list.html">← 返回列表</a>
+  <span class="site">本地练习站</span>
+</header>
+
+<article style="max-width:780px;margin:0 auto;padding:24px 20px 64px">
+  <h1>无头模式还是有界面:人工登录时该选哪个</h1>
+  <p class="meta">标签:基础、浏览器自动化</p>
+
+  <p>Playwright MCP 启动浏览器时默认是<strong>有界面</strong>的,窗口会真的弹出来。很多人以为无头模式一定更快,于是在需要人工登录的周次也把它关掉,结果卡在第一步。</p>
+
+  <h2>两种模式差在哪</h2>
+  <p>无头模式下浏览器不绘制窗口,只跑渲染和脚本,省掉了窗口和绘制的开销,适合放进 CI 里批量跑。有界面模式会真的开一个窗口,你能看见页面长什么样、能手动点、能自己输密码。两者的 DOM 和网络行为是一样的,差别只在"人能不能插手"。</p>
+
+  <h2>本周为什么必须有界面</h2>
+  <p>验收要求里有一次<strong>人工登录</strong>:凭据由你本人在浏览器里输入,出现验证码也由本人完成。这一步如果跑在无头模式下,窗口根本不存在,你既看不到登录页,也没法输入,Agent 只能干等或者被超时打断。所以只要任务里含"本人操作"的环节,就必须用有界面模式。</p>
+
+  <h2>什么时候可以切无头</h2>
+  <p>登录已经完成、会话已经存在本地配置里、后续只是读取和摘录时,可以切无头。或者用 <code>--isolated</code> 配一份保存好的 storage state,让会话从文件恢复,也不需要人再看一眼。</p>
+
+  <h2>不要拿无头当提速手段</h2>
+  <p>无头省下的是绘制时间,不是登录时间。把它当成"让任务快一点"的开关,往往换来的是验收现场演示不出来。速度问题该从等待方式和超时配置上解决,不是从关窗口上解决。</p>
+</article>
+</body>
+</html>

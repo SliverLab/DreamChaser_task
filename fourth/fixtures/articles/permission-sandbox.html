@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>源名单不是沙盒 - 本地练习站</title>
+<link rel="stylesheet" href="../assets/style.css">
+<script src="../assets/app.js"></script>
+<script>if (!window.PW.whoami()) location.replace('../index.html');</script>
+</head>
+<body>
+<header class="top">
+  <a href="../list.html">← 返回列表</a>
+  <span class="site">本地练习站</span>
+</header>
+
+<article style="max-width:780px;margin:0 auto;padding:20px 20px 64px">
+  <h1>源名单不是沙盒:allowed-origins 到底拦住了什么</h1>
+  <p class="meta">标签:权限、安全</p>
+
+  <p>给浏览器工具配一个 allowed-origins 列表,只允许访问本地练习站,看起来就"安全"了。这是个错觉,而且是一个很容易在评审现场被戳破的错觉。</p>
+
+  <h2>它到底做了什么</h2>
+  <p>allowed-origins 是一个过滤表:浏览器准备请求某个源时,先查这个源在不在名单里,不在就拦掉。多个源之间用分号分隔。它拦的是"请求发不出去",而不是"这个动作该不该做"。</p>
+
+  <h2>三件它做不到的事</h2>
+  <p>第一,它<strong>不是安全边界</strong>,官方文档写得很直接。第二,它<strong>不影响重定向</strong>:名单内的页面把你跳转到名单外,这个跳转它管不到。第三,它<strong>分辨不出动作语义</strong>:同一个点击工具,点"搜索"和点"删除这篇"在工具层长得一模一样,过滤表对此无能为力。</p>
+
+  <h2>真正要收住的三层</h2>
+  <p>第一层是<strong>独立的浏览器配置</strong>,别把自己日常主账号的用户目录指给自动化任务,也别用扩展去附着正在用的浏览器。第二层是<strong>最小权限的工作目录</strong>,写入限制在工作区内,不开允许访问任意路径的开关。第三层是<strong>产品层审批或工具层拦截</strong>,范围外的访问、写入、提交、发消息、删除都要单独确认一次。</p>
+
+  <h2>怎么讲清楚</h2>
+  <p>被问"源名单算不算沙盒"时,正确回答是:它只是访问过滤,能减少误开别站,但不是安全边界,拦不住跳转也分不清动作;真正的边界靠独立配置、工作目录限制和审批三层一起兜。承认它的边界,比把它说成沙盒可信得多。</p>
+</article>
+</body>
+</html>

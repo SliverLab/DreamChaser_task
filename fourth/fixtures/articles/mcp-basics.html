@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MCP 是怎么把模型和工具接起来的 - 本地练习站</title>
+<link rel="stylesheet" href="../assets/style.css">
+<script src="../assets/app.js"></script>
+<script>if (!window.PW.whoami()) location.replace('../index.html');</script>
+</head>
+<body>
+<header class="top">
+  <a href="../list.html">← 返回列表</a>
+  <span class="site">本地练习站</span>
+</header>
+
+<article style="max-width:780px;margin:0 auto;padding:24px 20px 64px">
+  <h1>MCP 是怎么把模型和工具接起来的</h1>
+  <p class="meta">标签:MCP、基础</p>
+
+  <p>MCP(Model Context Protocol)是一套让模型客户端与外部工具服务端通信的协议。它基于 JSON-RPC 2.0,消息格式固定,因此不同厂商的客户端和服务端可以互相拼接。</p>
+
+  <h2>服务端提供三类能力</h2>
+  <p>第一类是<strong>工具</strong>(tools),由模型主动调用,例如打开网页、点击元素、读取快照。第二类是<strong>资源</strong>(resources),由客户端按 URI 读取,更像"提供材料"。第三类是<strong>提示词</strong>(prompts),由用户主动触发的预设模板。三者用途不同:工具是动作,资源是数据,提示词是交互入口。</p>
+
+  <h2>三种传输方式</h2>
+  <p>stdio 传输把服务端作为子进程启动,通过标准输入输出交换消息,适合本机工具;SSE 和 streamable HTTP 走网络,适合远程服务。Playwright MCP 默认走 stdio,所以它一般被配置成客户端启动一个命令行进程。</p>
+
+  <h2>为什么要用协议而不是直接调 API</h2>
+  <p>直接调 API 意味着每换一个工具就要改一次集成代码。有了协议,客户端只需要实现一次,新增工具只是加一条服务端配置。代价是工具描述会占用模型的上下文,工具越多、描述越长,可用上下文越少。</p>
+
+  <p>一句话总结:MCP 把"模型能做什么"从代码里搬到了配置里,所以接入新工具通常不需要写代码,但需要在配置里把边界说清楚。</p>
+</article>
+</body>
+</html>
