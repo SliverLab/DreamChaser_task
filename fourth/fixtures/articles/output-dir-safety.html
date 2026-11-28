@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>output-dir:把 Agent 的写入关进一个抽屉 - 本地练习站</title>
+<link rel="stylesheet" href="../assets/style.css">
+<script src="../assets/app.js"></script>
+<script>if (!window.PW.whoami()) location.replace('../index.html');</script>
+</head>
+<body>
+<header class="top">
+  <a href="../list.html">← 返回列表</a>
+  <span class="site">本地练习站</span>
+</header>
+
+<article style="max-width:780px;margin:0 auto;padding:24px 20px 64px">
+  <h1>output-dir:把 Agent 的写入关进一个抽屉</h1>
+  <p class="meta">标签:权限、浏览器自动化</p>
+
+  <p>Agent 会把截图、页面快照、导出的文件落到磁盘上。这些写入如果散落在整个仓库里,既污染提交,也说不清它到底碰了什么。最小权限工作目录就是为了解决这件事。</p>
+
+  <h2>它管什么</h2>
+  <p><code>--output-dir</code> 指定产物输出目录:自动命名的截图和快照都落到这里,不会写到仓库根。配合"结果只写这个目录"的约定,提交时只需要看这一个抽屉。</p>
+
+  <h2>一个容易踩的坑</h2>
+  <p>这个参数只影响<strong>自动命名</strong>的产物。如果任务里写了显式文件名,路径是按工作区根目录解析的,不跟着 output-dir 走。所以看到文件跑到别处时,先检查是不是给了具体文件名,而不是先怀疑参数没生效。</p>
+
+  <h2>越界写必须单独确认</h2>
+  <p>往输出目录以外写文件,属于范围外动作,必须单独确认或直接被拒绝。同时不要开启"不受限的文件访问"这类开关,它会让这道抽屉失效。真正需要改仓库其他位置时,应当由人明确地做,而不是交给一次浏览任务顺手完成。</p>
+
+  <h2>和 gitignore 的关系</h2>
+  <p>输出目录里的结构化结果是要提交的,而浏览器配置目录和会话文件绝对不能提交。前者进版本库,后者进 <code>.gitignore</code>。把两者分开放,提交前扫一眼就能判断有没有带错东西。</p>
+</article>
+</body>
+</html>

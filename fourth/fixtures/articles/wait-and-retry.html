@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>等待与重试:为什么不能写死 sleep - 本地练习站</title>
+<link rel="stylesheet" href="../assets/style.css">
+<script src="../assets/app.js"></script>
+<script>if (!window.PW.whoami()) location.replace('../index.html');</script>
+</head>
+<body>
+<header class="top">
+  <a href="../list.html">← 返回列表</a>
+  <span class="site">本地练习站</span>
+</header>
+
+<article style="max-width:780px;margin:0 auto;padding:24px 20px 64px">
+  <h1>等待与重试:为什么不能写死 sleep(5)</h1>
+  <p class="meta">标签:等待、浏览器自动化</p>
+
+  <p>写 <code>sleep(5)</code> 的问题不在于慢,而在于它<strong>什么都不保证</strong>。5 秒到了页面可能还没好,也可能 0.3 秒就好了,你却白等了 4.7 秒。它把"等状态"换成了"等时间",这两件事不是一回事。</p>
+
+  <h2>先让工具的自动等待生效</h2>
+  <p>Playwright 的多数操作在结束前会自己等页面稳定:点击会等元素可点击,导航会等页面加载。很多"需要手动等"的场景,其实是定位写得不够准,不是工具没等。</p>
+
+  <h2>等状态,而不是等时间</h2>
+  <p>真正需要显式等待时,等的是<strong>一个可观察的状态</strong>。Playwright MCP 里对应 <code>browser_wait_for</code> 的 <code>text</code> 和 <code>textGone</code>:等某段文字出现,或者等某个加载提示消失。判断条件是页面事实,不是墙上的时钟。</p>
+
+  <h2>超时之后要重试,但重试有上限</h2>
+  <p>超时说明这次没成,不是说明要一直试。正确做法是:先重新取一次页面快照,看结构是不是变了,再决定重试。重试次数要有上限,比如 2 到 3 次;到顶就如实记录失败,交出已经拿到的结果。无限刷新会把一次失败拖成十分钟。</p>
+
+  <h2>不要依赖坐标</h2>
+  <p>按屏幕坐标点击会因为窗口大小、滚动位置、布局变化而静默点错元素。优先用快照里的 ref、角色和可访问名称。ref 在页面重渲染后会变,所以每次操作前重新取快照,而不是记住上一次的编号。</p>
+</article>
+</body>
+</html>

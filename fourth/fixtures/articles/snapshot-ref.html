@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>为什么按快照里的 ref 点击,而不是按屏幕坐标 - 本地练习站</title>
+<link rel="stylesheet" href="../assets/style.css">
+<script src="../assets/app.js"></script>
+<script>if (!window.PW.whoami()) location.replace('../index.html');</script>
+</head>
+<body>
+<header class="top">
+  <a href="../list.html">← 返回列表</a>
+  <span class="site">本地练习站</span>
+</header>
+
+<article style="max-width:780px;margin:0 auto;padding:24px 20px 64px">
+  <h1>为什么按快照里的 ref 点击,而不是按屏幕坐标</h1>
+  <p class="meta">标签:定位、快照</p>
+
+  <p>浏览器自动化里,定位元素有两种思路:按"是什么"找,或按"在哪"找。前者用无障碍树和选择器,后者用屏幕坐标。前者稳,后者脆。</p>
+
+  <h2>快照是什么</h2>
+  <p>快照是把当前页面压成一份结构化的无障碍树,每个可交互元素带一个短编号,通常写成 ref=e12 这种形式。它只保留语义信息,不保留像素。因此同一份快照在不同分辨率下是一致的,这让"定位"从视觉问题变成了结构问题。</p>
+
+  <h2>坐标为什么会坏</h2>
+  <p>坐标依赖三件事同时不变:窗口大小、页面布局、滚动位置。任何一项变了,原来的 (x, y) 就落到别的东西上。窗口被用户拖大一点,原本点"登录"的地方可能变成点"注册"。更麻烦的是,这种错误不会报错,它会安静地点到错的元素,然后你拿到的结果是错的却不自知。</p>
+
+  <h2>ref 也有失效的时候</h2>
+  <p>ref 不是永久标识。页面重新渲染、路由跳转、列表刷新之后,同一个元素可能拿到新的 ref。所以正确做法是:每次操作前重新取快照,从最新快照里拿 ref,而不是记住一个 ref 反复用。找不到元素时,先重新快照,再判断是不是真的不存在。</p>
+
+  <h2>结论</h2>
+  <p>优先用 ref、角色(role)和可访问名称定位;文本定位次之;坐标点击只在没有结构可用时兜底,而且应该显式说明这是兜底。把坐标当常规手段的脚本,换一台机器就会失效。</p>
+</article>
+</body>
+</html>
