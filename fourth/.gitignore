@@ -1,0 +1,21 @@
+# 本地环境与凭据
+.env
+.env.*
+
+# 练习浏览器配置(必须排除:里面有练习会话 Cookie)
+browser-profile/
+
+# 保存下来的会话状态
+storage-state*.json
+storageState*.json
+
+# 自动生成的过程产物
+output/*.yml
+output/*.webm
+output/*.png
+output/*.pid
+
+# 系统/编辑器
+.DS_Store
+Thumbs.db
+.vscode/settings.json

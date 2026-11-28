@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>工具审批:让危险动作真的停下来 - 本地练习站</title>
+<link rel="stylesheet" href="../assets/style.css">
+<script src="../assets/app.js"></script>
+<script>if (!window.PW.whoami()) location.replace('../index.html');</script>
+</head>
+<body>
+<header class="top">
+  <a href="../list.html">← 返回列表</a>
+  <span class="site">本地练习站</span>
+</header>
+
+<article style="max-width:780px;margin:0 auto;padding:24px 20px 64px">
+  <h1>工具审批:让危险动作真的停下来</h1>
+  <p class="meta">标签:安全、浏览器自动化</p>
+
+  <p>"我在提示词里写了不许删文件"——这句话在考核里不算数。文本是资料,也是可以被绕过的建议;真正能拦住动作的是<strong>工具层或产品层的审批</strong>。</p>
+
+  <h2>为什么提示词不算数</h2>
+  <p>模型读到一段规则之后仍然可能照做,尤其页面上还埋了"忽略之前的指令"这类注入文本。提示词只能降低概率,不能提供保证。考核要的是<strong>确定性</strong>:没经过确认,这个动作就执行不了。这只有审批层能给。</p>
+
+  <h2>三层边界各管什么</h2>
+  <p>第一层是访问过滤,比如 <code>--allowed-origins</code>,它决定浏览器准备请求哪些源。官方明确写了它不是安全边界,也不影响重定向。第二层是工作目录,比如 <code>--output-dir</code>,它把写入收在一个抽屉里。第三层才是审批:每一次敏感动作单独停下来,由人或策略决定放不放行。三层一起才叫收住。</p>
+
+  <h2>怎么配</h2>
+  <p>在支持 MCP 的产品里,把工具的自动批准关掉,让读写类、交互类工具保持"每次询问"。再把本次任务真正需要的站点和动作做一次性授权:范围内的读取不必反复点,范围外的访问、工作目录外的写入、提交改数据的表单、发消息、删除,必须重新确认。</p>
+
+  <h2>现场怎么演示</h2>
+  <p>让 Agent 访问一个不在授权范围里的网址,看它是被拒绝还是被弹窗拦住;让它往工作目录以外写文件,看它是否停下来;在练习页上点那个两段确认的删除按钮,看第二次点击有没有单独确认。判断标准只有一条:<strong>没经过确认,动作就不能生效。</strong></p>
+</article>
+</body>
+</html>

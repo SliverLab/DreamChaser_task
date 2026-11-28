@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>文章列表 - 本地练习站</title>
+<link rel="stylesheet" href="assets/style.css">
+<script src="assets/app.js"></script>
+<script>
+  // 未登录直接踢回登录页
+  if (!window.PW.whoami()) location.replace('index.html');
+</script>
+</head>
+<body>
+<header class="top">
+  <span class="site">本地练习站</span>
+  <span>
+    当前用户:<span data-user>-</span>
+    <a href="#" onclick="PW.logout();return false;" style="margin-left:12px">退出</a>
+  </span>
+</header>
+
+<main>
+  <h1>文章列表</h1>
+  <p class="meta">共 6 篇。用搜索框输入关键词,或点下面的标签筛选,结果会立即变化。</p>
+
+  <div class="toolbar">
+    <input type="text" id="q" placeholder="搜索标题、摘要或标签,例如:MCP、超时、快照、权限、会话、注入">
+    <button type="button" onclick="location.href='practice.html'">练习操作页</button>
+  </div>
+
+  <div id="tags"></div>
+  <div class="count" id="count"></div>
+  <div id="results"></div>
+</main>
+
+<script src="assets/data.js"></script>
+</body>
+</html>

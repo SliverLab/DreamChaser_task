@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>步数上限:25 次工具调用怎么分配 - 本地练习站</title>
+<link rel="stylesheet" href="../assets/style.css">
+<script src="../assets/app.js"></script>
+<script>if (!window.PW.whoami()) location.replace('../index.html');</script>
+</head>
+<body>
+<header class="top">
+  <a href="../list.html">← 返回列表</a>
+  <span class="site">本地练习站</span>
+</header>
+
+<article style="max-width:780px;margin:0 auto;padding:24px 20px 64px">
+  <h1>步数上限:25 次工具调用怎么分配</h1>
+  <p class="meta">标签:额度、浏览器自动化</p>
+
+  <p>浏览器任务很容易"越跑越贵":每打开一页取一次快照、每改一次条件再取一次。给任务写明步数上限,是为了让 Agent 在预算里做取舍,而不是无限试探。</p>
+
+  <h2>为什么要设上限</h2>
+  <p>没有上限时,失败会变成刷屏:重试、再重试、再换路径试。有了上限,Agent 就必须优先做有价值的事——先保证拿到 5 条有效结果,再考虑优化。到顶还必须停,并交出已经拿到的部分,而不是硬撑着把预算花光。</p>
+
+  <h2>一次典型任务花在哪</h2>
+  <p>登录页一次导航、登录后一次导航、列表页一到两次搜索或筛选、每篇文章一次打开加一次读取,五篇就是十次左右。再加上重新取快照和必要的重试,二十几次差不多是刚好够用的量。把上限设成 25,意味着几乎没有浪费的余地,所以提示词里要明确"先完成目标,再考虑别的"。</p>
+
+  <h2>超了怎么办</h2>
+  <p>到顶就停止,输出已完成的部分,并在结果里写清哪几篇没拿到、原因是什么。把失败写出来比用假数据凑数有价值得多:前者是可信的交付,后者是一票否决。</p>
+
+  <h2>和超时的关系</h2>
+  <p>超时管的是单次动作等多久,步数管的是整轮任务做多少次。两个都要有,缺一个都会失控:只有超时没有步数,会一直重试;只有步数没有超时,一次动作就能耗掉整轮预算。</p>
+</article>
+</body>
+</html>

@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MCP 工具分读和写:审批该拦哪一类 - 本地练习站</title>
+<link rel="stylesheet" href="../assets/style.css">
+<script src="../assets/app.js"></script>
+<script>if (!window.PW.whoami()) location.replace('../index.html');</script>
+</head>
+<body>
+<header class="top">
+  <a href="../list.html">← 返回列表</a>
+  <span class="site">本地练习站</span>
+</header>
+
+<article style="max-width:780px;margin:0 auto;padding:24px 20px 64px">
+  <h1>MCP 工具分读和写:审批该拦哪一类</h1>
+  <p class="meta">标签:MCP、浏览器自动化</p>
+
+  <p>浏览器 MCP 暴露的工具不是同一类东西。有的只读页面,有的会改变外部状态。审批策略要按这个区别来配,否则要么处处弹窗没法用,要么危险动作一路绿灯。</p>
+
+  <h2>读类工具</h2>
+  <p>导航、取快照、读取文本、等待某个状态出现,这些都不改变站点数据,失败重试也不会造成后果。在已授权的站点范围内,这类操作可以一次性放行,不必每次确认,否则任务会被点不完的弹窗拖死。</p>
+
+  <h2>写类工具</h2>
+  <p>点击提交按钮、填写并提交表单、写本地文件、保存或注入会话状态,这些都会改变状态。其中"保存会话"尤其要小心:保存下来的 Cookie 本身就是凭据,泄露等同于交出账号。写类动作应当保持每次确认,或者由更上层的策略明确授权。</p>
+
+  <h2>为什么 storage 类要单独开启</h2>
+  <p>会话相关的能力在 Playwright MCP 里是 opt-in 的,需要显式打开才出现。这个设计本身就是提醒:它不是日常读取能力,而是会碰到凭据的能力。用它之前先想清楚保存的文件放哪里、有没有进 gitignore。</p>
+
+  <h2>一条实用原则</h2>
+  <p>按"改不改变外部状态"划线,而不是按"看起来危不危险"划线。读页面永远不改状态,写和提交才改。把这条线画对,审批就既不会漏,也不会烦。</p>
+</article>
+</body>
+</html>

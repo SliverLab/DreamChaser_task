@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Playwright MCP 的默认超时 - 本地练习站</title>
+<link rel="stylesheet" href="../assets/style.css">
+<script src="../assets/app.js"></script>
+<script>if (!window.PW.whoami()) location.replace('../index.html');</script>
+</head>
+<body>
+<header class="top">
+  <a href="../list.html">← 返回列表</a>
+  <span class="site">本地练习站</span>
+</header>
+
+<article style="max-width:780px;margin:0 auto;padding:24px 20px 64px">
+  <h1>Playwright MCP 的默认超时:动作 5 秒,导航 60 秒</h1>
+  <p class="meta">标签:MCP、超时</p>
+
+  <p>Playwright MCP 有两个最容易搞混的超时:动作超时和导航超时。它们管的事情完全不同,调参时不能混着改。</p>
+
+  <h2>两个默认值</h2>
+  <p><strong>动作超时</strong>默认 5000 毫秒,管的是单个动作等元素就绪的时间,比如点击一个还没变成可点击状态的按钮。对应参数是 --timeout-action。<strong>导航超时</strong>默认 60000 毫秒,管的是一次页面跳转从发起到加载完成的时间,对应参数是 --timeout-navigation。两者单位都是毫秒。</p>
+
+  <h2>超时之后会发生什么</h2>
+  <p>超时不会静默继续,而是抛出一个带具体数值的错误,形如 "Timeout 15000ms exceeded"。这个数值就是当前生效的配置值,所以它是验证超时参数有没有生效的最直接证据。看到 5000 说明还在用默认值,看到你配置的数字说明参数生效了。</p>
+
+  <h2>什么时候该调</h2>
+  <p>本地练习站几乎不需要调,默认值足够。但如果目标站点首屏要拉很多静态资源,60 秒可能不够,这时才把导航超时调到 90000 或 120000。反过来,动作超时调太大会让一次失败拖很久,影响整体任务节奏。</p>
+
+  <h2>不要做的事</h2>
+  <p>把超时设成 0 或无限,等于放弃了"失败要停"这个约束。任务卡住时,无限等待比报错更难排查,因为你分不清是在等、还是在坏。</p>
+</article>
+</body>
+</html>
